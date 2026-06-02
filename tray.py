@@ -82,11 +82,12 @@ def acp_status() -> tuple[bool, str]:
 
 def acp_start() -> str:
     args = ["--agent", CONFIG["agent"], "--daemon", *_instance_args()]
-    if CONFIG.get("cwd"):
-        args += ["--cwd", CONFIG["cwd"]]
+    # Resolve cwd: explicit config > tray's launch cwd
+    cwd = CONFIG.get("cwd") or os.getcwd()
+    args += ["--cwd", cwd]
     try:
         r = _run(args)
-        return ((r.stdout or "") + (r.stderr or "")).strip() or "started"
+        return ((r.stdout or "") + (r.stderr or "")).strip() or f"started (cwd={cwd})"
     except Exception as e:
         return f"start error: {e}"
 
